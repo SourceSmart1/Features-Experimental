@@ -9,38 +9,28 @@ from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from dotenv import load_dotenv
 
-# Load environment variables (make sure you have a .env file with SERPER_API_KEY)
+# Load environment variables (ensure you have a .env file with SERPER_API_KEY)
 load_dotenv()
 serper_api_key = os.getenv("SERPER_API_KEY")
 
-# --------------------- Streamlit Page Config & Custom Styling ---------------------
+# --------------------- Streamlit Page Config & Styling ---------------------
 st.set_page_config(page_title="Supplier Search", layout="wide", initial_sidebar_state="expanded")
-
 st.markdown("<h1>Supplier Search</h1>", unsafe_allow_html=True)
 st.markdown("<p class='subheader'>Find suppliers for your material needs quickly and easily.</p>", unsafe_allow_html=True)
 
 # --------------------- Sidebar Inputs ---------------------
 with st.sidebar:
     st.markdown("### Enter Search Details")
-    # 1. Material Name (text input)
     material_name = st.text_input("Material Name", "Aluminum")
-    
-    # 2. Country (dropdown)
     countries = [
         "Estonia", "United States", "United Kingdom", "Germany", "France", 
         "Spain", "Italy", "Canada", "Australia", "Netherlands", "Sweden", "Finland"
     ]
     country = st.selectbox("Country", countries, index=countries.index("Estonia"))
-    
-    # 3. City (text input, optional)
     city = st.text_input("City (Optional)", "Tallin")
-    
-    # Construct the query string
     query = f"{material_name} supplier in {city}, {country}"
     st.markdown("**Generated Query:**")
     st.markdown(f"`{query}`")
-    
-    # Trigger for the search
     search_clicked = st.button("Search")
 
 # --------------------- Function to Call the Serper API ---------------------
@@ -63,11 +53,8 @@ def perform_search(query: str) -> dict:
 
 # --------------------- Email Extraction Helpers ---------------------
 def get_email(html_text: str):
-    """
-    Extracts and returns a list of email addresses from a text string.
-    """
+    """Extracts emails from text using regex."""
     try:
-        # Regex for emails; matches a variety of TLD lengths.
         emails = re.findall(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", html_text)
         return list(set(emails))  # Remove duplicates
     except Exception:
@@ -75,10 +62,9 @@ def get_email(html_text: str):
 
 def extract_contact_email(url: str):
     """
-    Given a website URL, this function tries to extract a contact email.
-    First it checks the home page; if none is found, it looks for a "contact" link
-    and attempts to extract an email from that page.
-    Returns the first email found or None.
+    Given a website URL, this function attempts to extract a contact email.
+    It first checks the home page, then looks for a 'contact' link if no email is found.
+    Returns the first found email or None.
     """
     try:
         response = requests.get(url, timeout=10)
@@ -87,8 +73,8 @@ def extract_contact_email(url: str):
             text = soup.get_text(separator=" ", strip=True)
             emails = get_email(text)
             if emails:
-                return emails[0]  # Return first email found
-            # If no email on home page, look for a "contact" link (case-insensitive)
+                return emails[0]
+            # Look for a 'contact' link if no email is found on the home page
             contact_link = soup.find('a', string=re.compile('contact', re.IGNORECASE))
             if contact_link and 'href' in contact_link.attrs:
                 contact_url = urljoin(url, contact_link['href'])
@@ -109,41 +95,30 @@ if search_clicked:
         result = perform_search(query)
     
     if "organic" in result:
-        # Build initial DataFrame with supplier names and websites
-        rows = []
+        # Build initial list of supplier dictionaries (without displaying an initial table)
+        suppliers = []
         for item in result["organic"]:
             name = item.get("title", "N/A")
             website = item.get("link", "N/A")
-            rows.append({"Name": name, "Website": website})
-        df = pd.DataFrame(rows)
-        
-        st.markdown("<div class='result-section'>", unsafe_allow_html=True)
-        st.success("Initial search complete!")
-        st.table(df)
-        st.markdown("</div>", unsafe_allow_html=True)
-        
-        # ---------------------
-        # Now loop through each website to extract the contact email.
-        # Only include rows with a found email.
-        # ---------------------
-        final_rows = []
+            suppliers.append({"Name": name, "Website": website})
+        df = pd.DataFrame(suppliers)
+        live_table_placeholder = st.empty()  # Placeholder for the live-updating table
         progress_bar = st.progress(0)
+        final_rows = []
         total = len(df)
+        
+        # Loop through each supplier and update the table live.
         for idx, row in df.iterrows():
             website = row["Website"]
             contact_email = extract_contact_email(website)
-            if contact_email:  # Only keep row if email is found
+            if contact_email:
                 row["Contact Email"] = contact_email
                 final_rows.append(row)
             progress_bar.progress((idx + 1) / total)
+            # Update the live table with the current results
+            live_table_placeholder.table(pd.DataFrame(final_rows))
         
-        if final_rows:
-            final_df = pd.DataFrame(final_rows)
-            st.markdown("<div class='result-section'>", unsafe_allow_html=True)
-            st.markdown("<h2>Final Results with Contact Emails</h2>", unsafe_allow_html=True)
-            st.table(final_df)
-            st.markdown("</div>", unsafe_allow_html=True)
-        else:
+        if not final_rows:
             st.error("No contact emails found on any of the supplier websites.")
     else:
         st.error("No search results found.")

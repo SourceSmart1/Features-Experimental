@@ -14,8 +14,8 @@ load_dotenv()
 serper_api_key = os.getenv("SERPER_API_KEY")
 
 # --------------------- Streamlit Page Config & Styling ---------------------
-st.set_page_config(page_title="Supplier Search", layout="wide", initial_sidebar_state="expanded")
-st.markdown("<h1>Supplier Search</h1>", unsafe_allow_html=True)
+st.set_page_config(page_title="SourceSmart", layout="wide", initial_sidebar_state="expanded")
+st.markdown("<h1>SourceSmart</h1>", unsafe_allow_html=True)
 st.markdown("<p class='subheader'>Find suppliers for your material needs quickly and easily.</p>", unsafe_allow_html=True)
 
 # --------------------- Sidebar Inputs ---------------------

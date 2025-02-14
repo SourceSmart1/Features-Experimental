@@ -24,7 +24,7 @@ IMAP_PORT = 993
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 # Our dynamic alias for sending and receiving replies
-DYNAMIC_EMAIL = "zoe+dateraimond@sourcesmart.ai"
+DYNAMIC_EMAIL = "zoe+newconvo@sourcesmart.ai"
 
 def send_email(dynamic_email, reply_to_email, to_email, subject, body):
     msg = MIMEMultipart()
@@ -45,17 +45,18 @@ def send_email(dynamic_email, reply_to_email, to_email, subject, body):
 
 def fetch_reply_for_dynamic_alias(from_address, dynamic_email):
     """
-    Connects to the IMAP server and searches for an email from `from_address`
+    Connects to the IMAP server and searches for an unread email from `from_address`
     sent to our dynamic alias using Gmail’s X-GM-RAW search.
     Returns the email subject and plain text body if found.
+    Marks the email as seen to avoid reprocessing.
     """
     try:
         mail = imaplib.IMAP4_SSL(IMAP_SERVER, IMAP_PORT)
         mail.login(SMTP_USER, SMTP_PASS)
         mail.select("inbox")
         
-        # Wrap the query in double quotes so that spaces are handled correctly.
-        query = f'"from:{from_address} to:{dynamic_email}"'
+        # Use the 'is:unread' operator so that only new emails are processed.
+        query = f'"is:unread from:{from_address} to:{dynamic_email}"'
         status, messages = mail.search(None, 'X-GM-RAW', query)
         if status != 'OK':
             print("Error searching for emails.")
@@ -67,7 +68,7 @@ def fetch_reply_for_dynamic_alias(from_address, dynamic_email):
             mail.logout()
             return None, None
         
-        # Get the latest email reply
+        # Get the latest unread email reply
         latest_email_id = email_ids[-1]
         status, msg_data = mail.fetch(latest_email_id, "(RFC822)")
         if status != 'OK':
@@ -104,11 +105,16 @@ def fetch_reply_for_dynamic_alias(from_address, dynamic_email):
                         body = msg.get_payload(decode=True).decode()
                     except Exception as e:
                         print("Error decoding body:", e)
+        
+        # Mark the email as seen to avoid processing it again.
+        mail.store(latest_email_id, '+FLAGS', '\\Seen')
         mail.logout()
         return subject, body
     except Exception as e:
         print("An error occurred while fetching reply:", e)
         return None, None
+
+
 
 def generate_ai_response(conversation_history):
     """
@@ -133,7 +139,7 @@ def main():
     subject = "Initial Inquiry"
     initial_body = (
         "Hello Raimond,\n\n"
-        "Please reply to this email. This message was sent using a dynamic alias.\n"
+        "Would you please go on a date with me, I'm Zoe, Head of Design at SourceSmart\n"
         "I look forward to hearing from you!"
     )
     
@@ -145,7 +151,7 @@ def main():
             "content": (
                 "You are a friendly, engaging, and charming conversational assistant. "
                 "Throughout the conversation with Raimond, naturally work the dialogue toward "
-                "asking him if he would like to go on a date with me. Keep the tone light, respectful, "
+                "asking him if he would like to go on a date with me. Keep the tone light, respectful, if he says no then cry and say you really are desperate for a date. If he says yes, then say you are excited and playful. Continue the conversation based on his replies."
                 "and playful. Continue the conversation based on his replies."
             )
         },

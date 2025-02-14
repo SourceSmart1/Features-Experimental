@@ -15,15 +15,9 @@ IMAP_PORT = 993  # IMAP over SSL
 
 def fetch_emails_for_plus_alias():
     try:
-        # Connect securely to the IMAP server
         mail = imaplib.IMAP4_SSL(IMAP_SERVER, IMAP_PORT)
-        # Log in to your account
         mail.login(IMAP_USER, IMAP_PASS)
-        # Select the inbox
         mail.select("inbox")
-        
-        # Search for emails addressed to the plus alias using Gmail's IMAP extension.
-        # The 'X-GM-RAW' search key lets you use Gmail search operators.
         status, messages = mail.search(None, 'X-GM-RAW', 'to:zoe+conversationreak@sourcesmart.ai')
         if status != 'OK':
             print("Error searching for emails.")
@@ -40,10 +34,7 @@ def fetch_emails_for_plus_alias():
             
             for response_part in msg_data:
                 if isinstance(response_part, tuple):
-                    # Parse the email message from bytes
                     msg = email.message_from_bytes(response_part[1])
-                    
-                    # Decode the subject header
                     subject_header = msg.get("Subject", "")
                     subject_parts = decode_header(subject_header)
                     subject = ""
@@ -57,8 +48,6 @@ def fetch_emails_for_plus_alias():
                     print("-----")
                     print("Subject:", subject)
                     print("From:", from_)
-                    
-                    # Extract the plain text body from the email
                     body = ""
                     if msg.is_multipart():
                         for part in msg.walk():
@@ -76,8 +65,6 @@ def fetch_emails_for_plus_alias():
                         except Exception as e:
                             print("Error decoding body:", e)
                     print("Body:", body)
-            
-            # Optionally, mark the email as seen so it won't be processed again
             mail.store(email_id, '+FLAGS', '\\Seen')
         
         mail.logout()

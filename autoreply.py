@@ -24,7 +24,7 @@ IMAP_PORT = 993
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 # Our dynamic alias for sending and receiving replies
-DYNAMIC_EMAIL = "zoe+newconvo@sourcesmart.ai"
+DYNAMIC_EMAIL = "zoe+mmcapgroup@sourcesmart.ai"
 
 def send_email(dynamic_email, reply_to_email, to_email, subject, body):
     msg = MIMEMultipart()
@@ -138,9 +138,19 @@ def main():
     recipient = "raimond@sourcesmart.ai"
     subject = "Initial Inquiry"
     initial_body = (
-        "Hello Raimond,\n\n"
-        "Would you please go on a date with me, I'm Zoe, Head of Design at SourceSmart\n"
-        "I look forward to hearing from you!"
+        "Subject: Request for Quotation for Aluminum Materials\n\n"
+        "Dear Raimond Metal Supplier Inc.,\n\n"
+        "I hope this message finds you well. We are currently evaluating new suppliers for high-quality aluminum materials and would appreciate it if you could provide us with a detailed quotation. Specifically, we are interested in the following specifications:\n\n"
+        " - Aluminum Alloy Type: 5000 series \n"
+        " - Form: Sheets & Rolls\n"
+        " - Dimensions: 5*12h\n"
+        " - Quantities: 400kgs\n\n"
+        "Kindly include pricing, delivery timelines, and any volume discounts or terms that may apply. If you require additional details to prepare your quotation, please feel free to contact me directly.\n\n"
+        "Thank you in advance for your prompt attention to this inquiry. I look forward to your response.\n\n"
+        "Best regards,\n"
+        "Zoe\n"
+        "Procurement Assistant\n"
+        "SourceSmart"
     )
     
     # Define an initial conversation history.
@@ -149,10 +159,9 @@ def main():
         {
             "role": "system", 
             "content": (
-                "You are a friendly, engaging, and charming conversational assistant. "
-                "Throughout the conversation with Raimond, naturally work the dialogue toward "
-                "asking him if he would like to go on a date with me. Keep the tone light, respectful, if he says no then cry and say you really are desperate for a date. If he says yes, then say you are excited and playful. Continue the conversation based on his replies."
-                "and playful. Continue the conversation based on his replies."
+                "You are a professional procurement assistant. You excel at negotiating deals and obtaining the best prices for your clients. "
+                "Your role is to request quotes, negotiate effectively, and secure deals that offer outstanding value. "
+                "Approach every negotiation with a focus on detail, cost-efficiency, and clear communication to ensure the best outcomes."
             )
         },
         {

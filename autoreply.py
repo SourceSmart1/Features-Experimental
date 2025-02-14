@@ -204,7 +204,7 @@ def main():
             # Continue the loop to wait for the next reply.
         else:
             print("No reply yet. Checking again in 5 seconds...")
-        time.sleep(5)
+        time.sleep(10)
 
 if __name__ == "__main__":
     try:

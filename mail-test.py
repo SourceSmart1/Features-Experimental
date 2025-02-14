@@ -27,8 +27,8 @@ def send_email(dynamic_email, reply_to_email, to_email, subject, body):
 
 # Send an email using a plus-alias with a custom Reply-To address
 send_email(
-    dynamic_email="company1+zoe@sourcesmart.ai", 
-    reply_to_email="company1+zoe@sourcesmart.ai",  # Replies will go here
+    dynamic_email="zoe+conversationreak@sourcesmart.ai", 
+    reply_to_email="zoe+conversationreak@sourcesmart.ai",  # Replies will go here
     to_email="nisarvskp@gmail.com", 
     subject="Test Email with Reply-To", 
     body="This is a test email with a custom Reply-To."

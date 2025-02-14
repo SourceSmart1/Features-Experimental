@@ -8,8 +8,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # IMAP server settings and credentials
-IMAP_USER = os.getenv("IMAP_USER")  # e.g., your_email@gmail.com
-IMAP_PASS = os.getenv("IMAP_PASS")
+IMAP_USER = os.getenv("SMTP_USER")  # e.g., your_email@gmail.com
+IMAP_PASS = os.getenv("SMTP_PASS")
 IMAP_SERVER = "imap.gmail.com"
 IMAP_PORT = 993  # IMAP over SSL
 

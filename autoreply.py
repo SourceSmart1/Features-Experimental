@@ -24,7 +24,8 @@ IMAP_PORT = 993
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 # Our dynamic alias for sending and receiving replies
-DYNAMIC_EMAIL = "zoe+mmcapgroup@sourcesmart.ai"
+FROM_MAIL = "newconvo+zoe@sourcesmart.ai"
+REPLY_TO_MAIL = "zoe+newconvo@sourcesmart.ai"
 
 def send_email(dynamic_email, reply_to_email, to_email, subject, body):
     msg = MIMEMultipart()
@@ -135,7 +136,7 @@ def generate_ai_response(conversation_history):
         return "I'm sorry, I couldn't generate a response."
 
 def main():
-    recipient = "raimond@sourcesmart.ai"
+    recipient = "nisar@sourcesmart.ai"
     subject = "Initial Inquiry"
     initial_body = (
         "Subject: Request for Quotation for Aluminum Materials\n\n"
@@ -171,12 +172,12 @@ def main():
     ]
     
     # Step 1: Send the initial email from our dynamic alias
-    send_email(DYNAMIC_EMAIL, DYNAMIC_EMAIL, recipient, subject, initial_body)
+    send_email(FROM_MAIL, REPLY_TO_MAIL, recipient, subject, initial_body)
     print(f"Waiting for a reply from {recipient}...")
     
     # Conversation loop: keep waiting for new replies and respond accordingly.
     while True:
-        reply_subject, reply_body = fetch_reply_for_dynamic_alias(recipient, DYNAMIC_EMAIL)
+        reply_subject, reply_body = fetch_reply_for_dynamic_alias(recipient, REPLY_TO_MAIL)
         if reply_body:
             print("Reply received!")
             print("Reply Subject:", reply_subject)
@@ -199,7 +200,7 @@ def main():
             })
             
             # Send the AI-generated response back to Raimond.
-            send_email(DYNAMIC_EMAIL, DYNAMIC_EMAIL, recipient, "Re: " + subject, ai_response)
+            send_email(FROM_MAIL, REPLY_TO_MAIL, recipient, "Re: " + subject, ai_response)
             
             # Continue the loop to wait for the next reply.
         else:

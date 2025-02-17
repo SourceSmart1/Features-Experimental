@@ -141,8 +141,8 @@ if search_clicked:
             completion = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=300,
-                temperature=0.7
+                max_tokens=400,
+                temperature=0
             )
             response_content = completion.choices[0].message.content.strip()
             

@@ -76,6 +76,46 @@ with st.sidebar:
         <p><span class="model-desc">{MODELS[model]['description']}</span></p>
     """, unsafe_allow_html=True)
 
+    # API Parameters under expandable section
+    with st.expander("Advanced Parameters", expanded=False):
+        # Temperature
+        st.markdown("""
+            <p><span class="model-param">Temperature</span> controls randomness in the output. 
+            Lower values (like 0.2) make responses more focused and deterministic, 
+            while higher values (like 0.8) make responses more creative and diverse.</p>
+        """, unsafe_allow_html=True)
+        temperature = st.slider("Temperature", min_value=0.0, max_value=1.0, value=0.7, step=0.1)
+        
+        # Max Tokens
+        st.markdown("""
+            <p><span class="model-param">Max Tokens</span> limits the length of the response. 
+            One token is roughly 4 characters or 3/4 of a word. 
+            Higher values allow for longer responses but may increase costs.</p>
+        """, unsafe_allow_html=True)
+        max_tokens = st.slider("Max Tokens", min_value=100, max_value=4000, value=2000, step=100)
+        
+        # Top P
+        st.markdown("""
+            <p><span class="model-param">Top P</span> (nucleus sampling) controls diversity via probability mass. 
+            Lower values (like 0.1) make responses more focused, 
+            while higher values (like 0.9) allow for more diverse outputs.</p>
+        """, unsafe_allow_html=True)
+        top_p = st.slider("Top P", min_value=0.1, max_value=1.0, value=0.9, step=0.1)
+        
+        # Frequency Penalty
+        st.markdown("""
+            <p><span class="model-param">Frequency Penalty</span> reduces repetition of the same line verbatim. 
+            Higher values (like 1.0) make the model less likely to repeat the same line.</p>
+        """, unsafe_allow_html=True)
+        frequency_penalty = st.slider("Frequency Penalty", min_value=-2.0, max_value=2.0, value=0.0, step=0.1)
+        
+        # Presence Penalty
+        st.markdown("""
+            <p><span class="model-param">Presence Penalty</span> reduces repetition of the same topic. 
+            Higher values (like 1.0) make the model more likely to talk about new topics.</p>
+        """, unsafe_allow_html=True)
+        presence_penalty = st.slider("Presence Penalty", min_value=-2.0, max_value=2.0, value=0.0, step=0.1)
+
 # Main chat interface
 st.title(f"Procurement Expert: {model}")
 
@@ -112,7 +152,12 @@ if prompt := st.chat_input("What would you like help with?"):
         chat_completion = client.chat.completions.create(
             messages=st.session_state.messages,
             model=model,
-            stream=True
+            stream=True,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            top_p=top_p,
+            frequency_penalty=frequency_penalty,
+            presence_penalty=presence_penalty
         )
         
         for chunk in chat_completion:

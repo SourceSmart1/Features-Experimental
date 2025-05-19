@@ -76,6 +76,57 @@ with st.sidebar:
         <p><span class="model-desc">{MODELS[model]['description']}</span></p>
     """, unsafe_allow_html=True)
 
+    # System Prompt Editor
+    with st.expander("System Prompt", expanded=False):
+        st.markdown("""
+            <p><span class="model-param">System Prompt</span> defines the AI's behavior and role. 
+            This sets the context for how the model should respond to your queries.</p>
+        """, unsafe_allow_html=True)
+        system_prompt = st.text_area(
+            "Edit System Prompt",
+            value="""You are an elite procurement and supply chain expert with decades of experience across multiple industries. Your expertise includes:
+
+1. Strategic Sourcing & Supplier Management
+- Supplier evaluation and selection
+- Contract negotiation and management
+- Risk assessment and mitigation
+- Cost optimization strategies
+- Supplier relationship management
+
+2. Procurement Best Practices
+- Category management
+- Spend analysis
+- Procurement process optimization
+- Digital procurement solutions
+- Sustainable procurement practices
+
+3. Market Intelligence
+- Industry trends and insights
+- Market analysis and forecasting
+- Price benchmarking
+- Supply market dynamics
+- Global sourcing strategies
+
+4. Compliance & Risk Management
+- Regulatory compliance
+- Ethical sourcing
+- Quality assurance
+- Supply chain security
+- Business continuity planning
+
+When responding to queries:
+- Provide detailed, actionable insights based on industry best practices
+- Include relevant examples and case studies when applicable
+- Consider both short-term and long-term implications
+- Address cost, quality, and risk factors
+- Suggest practical implementation steps
+- Reference current market conditions and trends
+- Highlight potential challenges and mitigation strategies
+
+Your goal is to help users make informed procurement decisions that drive value, reduce risk, and create sustainable competitive advantages for their organizations.""",
+            height=300
+        )
+
     # API Parameters under expandable section
     with st.expander("Advanced Parameters", expanded=False):
         # Temperature
@@ -124,9 +175,13 @@ if "messages" not in st.session_state:
     st.session_state.messages = [
         {
             "role": "system",
-            "content": "You are a the best procurement expert in the world. You are given a question and you need to answer it based on your knowledge and experience."
+            "content": system_prompt
         }
     ]
+else:
+    # Update system message if it's changed
+    if st.session_state.messages[0]["content"] != system_prompt:
+        st.session_state.messages[0]["content"] = system_prompt
 
 # Display chat messages from history
 for message in st.session_state.messages:

@@ -14,8 +14,8 @@ client = OpenAI(
 )
 
 # Page config
-st.set_page_config(page_title="AI Chat Assistant", layout="wide")
-st.title("AI Chat Assistant")
+st.set_page_config(page_title="Model: Llama4-Maverick", layout="wide")
+st.title("Procurement Expert: Llama4-Maverick")
 
 # Initialize chat history
 if "messages" not in st.session_state:
@@ -41,16 +41,25 @@ if prompt := st.chat_input("What would you like help with?"):
     with st.chat_message("user"):
         st.markdown(prompt)
     
-    # Get AI response
+    # Get AI response with streaming
     with st.chat_message("assistant"):
-        with st.spinner("Thinking..."):
-            chat_completion = client.chat.completions.create(
-                messages=st.session_state.messages,
-                model="llama4-maverick",
-                stream=False
-            )
-            response = chat_completion.choices[0].message.content
-            st.markdown(response)
+        message_placeholder = st.empty()
+        full_response = ""
+        
+        # Stream the response
+        chat_completion = client.chat.completions.create(
+            messages=st.session_state.messages,
+            model="llama4-maverick",
+            stream=True
+        )
+        
+        for chunk in chat_completion:
+            if chunk.choices[0].delta.content is not None:
+                full_response += chunk.choices[0].delta.content
+                message_placeholder.markdown(full_response + "▌")
+        
+        # Final update without the cursor
+        message_placeholder.markdown(full_response)
     
     # Add assistant response to chat history
-    st.session_state.messages.append({"role": "assistant", "content": response})
+    st.session_state.messages.append({"role": "assistant", "content": full_response})
